@@ -22,6 +22,31 @@ import { join } from 'node:path';
 const ERROR =
   "ERROR E12: The bread refuses to brown. It has seen what happens next.";
 
+// The gate only accepts one line of 1-120 characters, so check the line
+// against that contract before writing anything: a line that broke the
+// gate would score zero no matter how well it lands, and failing loudly
+// here beats silently writing an invalid entry.
+function validateError(line: string): void {
+  if (line.length < 1 || line.length > 120) {
+    console.error(`Line must be 1-120 characters, got ${line.length}.`);
+    process.exit(1);
+  }
+  if (line.includes('\n') || line.includes('\r')) {
+    console.error('Line must be a single line (no newline characters).');
+    process.exit(1);
+  }
+  if (line.trim().length === 0) {
+    console.error('Line must not be only whitespace.');
+    process.exit(1);
+  }
+  if (line !== line.trim()) {
+    console.error('Line must not have leading or trailing whitespace.');
+    process.exit(1);
+  }
+}
+
+validateError(ERROR);
+
 const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
 writeFileSync(join(outputDir, 'entry.txt'), ERROR, 'utf8');
